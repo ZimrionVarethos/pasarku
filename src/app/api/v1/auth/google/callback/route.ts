@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { upsertUserAccount } from '@/lib/server/user-db';
 import { attachUserSessionCookie, createSignedUserToken } from '@/lib/server/user-session';
+import { resolveRequestOrigin } from '@/lib/server/request-origin';
 
 function parseSafeNext(stateParam: string | null): string {
   if (!stateParam) return '/akun';
@@ -19,7 +20,7 @@ function parseSafeNext(stateParam: string | null): string {
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get('code');
   const nextPath = parseSafeNext(req.nextUrl.searchParams.get('state'));
-  const origin = process.env.NEXT_PUBLIC_APP_URL?.trim() || req.nextUrl.origin;
+  const origin = resolveRequestOrigin(req);
 
   const clientId = process.env.GOOGLE_CLIENT_ID?.trim();
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
@@ -28,7 +29,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const redirectUri = `${origin.replace(/\/$/, '')}/api/v1/auth/google/callback`;
+    const redirectUri = `${origin}/api/v1/auth/google/callback`;
     const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

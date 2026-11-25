@@ -4,6 +4,7 @@ import {
   findUserById,
   getSeedReportsForUser,
   toPublicUserProfile,
+  upsertUserAccount,
 } from '@/lib/server/user-db';
 import { fetchCatalogFromDb, fetchUserReportsFromDb } from '@/lib/server/admin-db';
 import { INITIAL_ADMIN_STATE } from '@/lib/store/admin-seed';
@@ -22,12 +23,15 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const user = await findUserById(auth.userId);
+  let user = await findUserById(auth.userId);
   if (!user) {
-    return NextResponse.json(
-      { success: false, message: 'Profil pengguna tidak ditemukan.' },
-      { status: 404 }
-    );
+    user = await upsertUserAccount({
+      id: auth.userId,
+      name: auth.email.split('@')[0],
+      email: auth.email,
+      authProvider: 'GOOGLE',
+      emailVerified: true,
+    });
   }
 
   const region =

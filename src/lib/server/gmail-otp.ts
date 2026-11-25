@@ -21,6 +21,7 @@ function sendSmtpCommand(
     let buffer = '';
     const onData = (chunk: Buffer) => {
       buffer += chunk.toString('utf8');
+      if (!buffer.endsWith('\r\n')) return;
       const lines = buffer.split('\r\n').filter(Boolean);
       const lastLine = lines[lines.length - 1] || '';
       if (/^\d{3} /.test(lastLine)) {

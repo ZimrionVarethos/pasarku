@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { toPublicUserProfile, upsertUserAccount } from '@/lib/server/user-db';
 import { attachUserSessionCookie, createSignedUserToken } from '@/lib/server/user-session';
+import { resolveRequestOrigin } from '@/lib/server/request-origin';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -26,8 +27,8 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  const origin = process.env.NEXT_PUBLIC_APP_URL?.trim() || req.nextUrl.origin;
-  const redirectUri = `${origin.replace(/\/$/, '')}/api/v1/auth/google/callback`;
+  const origin = resolveRequestOrigin(req);
+  const redirectUri = `${origin}/api/v1/auth/google/callback`;
   const state = Buffer.from(JSON.stringify({ next: nextPath })).toString('base64url');
   const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
   authUrl.searchParams.set('client_id', clientId);
