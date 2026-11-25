@@ -26,7 +26,7 @@ export function AdminOverviewView({ onNavigate }: AdminOverviewViewProps) {
   const totalPairsNeeded = activeCommodities * activeMarkets;
   const todayStr = new Date().toISOString().split('T')[0];
   const recordedTodayCount = Object.values(dailyPrices).filter(
-    (p) => p.recordedDate >= todayStr || p.recordedDate.startsWith('2026-10')
+    (p) => p.recordedDate >= todayStr
   ).length;
 
   const completionPct =

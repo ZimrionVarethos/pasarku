@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { CheckCircle, ShieldCheck, MapPin, Clock, PlusCircle } from '@phosphor-icons/react';
+import { CheckCircle, ShieldCheck, ClipboardText, Clock, PlusCircle } from '@phosphor-icons/react';
 import { formatRupiah } from '@/lib/utils';
 import type { ReportType, StockStatus } from '@/types';
 
@@ -14,7 +14,7 @@ interface Props {
   normalizedPricePerKg: number;
   reportType?: ReportType;
   stockStatus?: StockStatus;
-  hasPhoto: boolean;
+  photoCount: number;
   onReset: () => void;
 }
 
@@ -27,7 +27,7 @@ export function LaporSuccessCard({
   normalizedPricePerKg,
   reportType = 'PRICE',
   stockStatus,
-  hasPhoto,
+  photoCount,
   onReset,
 }: Props) {
   const isShortage = reportType === 'SHORTAGE';
@@ -48,8 +48,8 @@ export function LaporSuccessCard({
           </h2>
           <p className="text-[13px] sm:text-[14px] text-[var(--text-secondary)] max-w-[520px]">
             {isShortage
-              ? 'Laporan kondisi stok dari pedagang telah masuk antrean verifikasi Moderator HargaKu tanpa menyingkap identitas lapak.'
-              : 'Data harga lapakmu telah dicatat dan masuk antrean verifikasi konsensus Moderator HargaKu & Pemantau Pasar.'}
+              ? 'Laporan kondisi stok dari pedagang telah masuk antrean verifikasi Moderator PasarKu tanpa menyingkap identitas lapak.'
+              : 'Data harga lapakmu telah dicatat dan masuk antrean verifikasi konsensus Moderator PasarKu & Pemantau Pasar.'}
           </p>
         </div>
       </div>
@@ -93,7 +93,11 @@ export function LaporSuccessCard({
           <span className="text-[var(--text-muted)] font-medium">Privasi &amp; Bukti</span>
           <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
             <ShieldCheck size={16} weight="bold" className="text-[var(--forest-ink)]" />
-            <span>{hasPhoto ? 'Foto Terunggah (EXIF Sanitized)' : 'Agregat Anonim Per Pasar'}</span>
+            <span>
+              {photoCount > 0
+                ? `${photoCount} Foto Terunggah (EXIF Sanitized)`
+                : 'Agregat Anonim Per Pasar'}
+            </span>
           </span>
         </div>
 
@@ -117,11 +121,11 @@ export function LaporSuccessCard({
         </button>
 
         <Link
-          href="/peta"
+          href="/akun?tab=riwayat"
           className="market-btn-primary w-full sm:w-auto flex-1 py-3 px-5 text-[13px] font-bold flex items-center justify-center gap-2 no-underline"
         >
-          <MapPin size={16} weight="bold" />
-          <span>Lihat Kondisi Pasar di Peta</span>
+          <ClipboardText size={16} weight="bold" />
+          <span>Pantau Riwayat Laporan Saya</span>
         </Link>
       </div>
     </div>

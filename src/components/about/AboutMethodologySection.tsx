@@ -29,7 +29,7 @@ export function AboutMethodologySection() {
             1. Hirarki Penentuan Harga Pembanding (Fallback Waterfall)
           </h3>
           <p className="text-[13px] text-[var(--text-secondary)] mt-1 leading-relaxed">
-            HargaKu menggunakan sistem bertingkat adaptif. Jika data tingkat lokal belum mencukupi batas minimum, sistem otomatis berpindah ke acuan lapis berikutnya tanpa halusinasi data.
+            PasarKu menggunakan sistem bertingkat adaptif. Jika data tingkat lokal belum mencukupi batas minimum, sistem otomatis berpindah ke acuan lapis berikutnya tanpa halusinasi data.
           </p>
         </div>
 
@@ -95,7 +95,7 @@ export function AboutMethodologySection() {
           </div>
           <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed">
             Rata-rata aritmatika biasa (<code className="text-[var(--text-primary)] font-mono bg-[var(--bg-card)] px-1.5 py-0.5 rounded text-[12px]">Mean</code>) sangat rapuh terhadap angka ekstrem (contoh: jika ada pengguna jahil menginput harga cabai Rp 1.000.000, rata-rata pasar akan rusak seketika). 
-            HargaKu menerapkan <strong className="text-[var(--text-primary)]">Median &amp; Deteksi MAD</strong>:
+            PasarKu menerapkan <strong className="text-[var(--text-primary)]">Median &amp; Deteksi MAD</strong>:
           </p>
           <div className="p-3 bg-[var(--bg-card)] rounded-lg border border-[var(--border-subtle)] font-mono text-[12px] text-[var(--text-primary)] overflow-x-auto">
             MAD = median(|x_i - median(X)|) | Batas Toleransi Anomali: deviasi &gt; 3 x MAD atau deviasi &gt; 300% HAP otomatis ditandai
@@ -112,7 +112,7 @@ export function AboutMethodologySection() {
                 Wajar (Fair)
               </span>
               <div className="text-[12px] font-bold text-[var(--text-primary)]">
-                Rentang -10% s.d. +10%
+                Rentang -15% s.d. +10%
               </div>
               <p className="text-[11px] text-[var(--text-secondary)]">
                 Harga berada dalam dinamika pasokan normal pasar harian.

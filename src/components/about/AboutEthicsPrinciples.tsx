@@ -19,7 +19,7 @@ const PRINCIPLES: PrincipleItem[] = [
     number: '01',
     title: 'Anti-Doxxing & Agregasi Lapak',
     description:
-      'HargaKu secara tegas DILARANG menyebut nama individu pedagang, nomor kios spesifik, atau identitas pemilik lapak. Semua data disajikan murni secara agregat per pasar untuk mencegah perundungan atau stigma terhadap pedagang kecil.',
+      'PasarKu secara tegas DILARANG menyebut nama individu pedagang, nomor kios spesifik, atau identitas pemilik lapak. Semua data disajikan murni secara agregat per pasar untuk mencegah perundungan atau stigma terhadap pedagang kecil.',
     icon: LockKey,
     iconColor: 'text-[var(--accent-chili)]',
   },
@@ -35,7 +35,7 @@ const PRINCIPLES: PrincipleItem[] = [
     number: '03',
     title: 'Praduga Baik & Dinamika Pangan',
     description:
-      'Kami memahami harga pangan bervariasi karena modal kulakan subuh, perbedaan kualitas barang (grade cabai/daging), dan biaya transportasi pedagang. HargaKu hadir sebagai kompas referensi, bukan alat memojokkan pedagang.',
+      'Kami memahami harga pangan bervariasi karena modal kulakan subuh, perbedaan kualitas barang (grade cabai/daging), dan biaya transportasi pedagang. PasarKu hadir sebagai kompas referensi, bukan alat memojokkan pedagang.',
     icon: Handshake,
     iconColor: 'text-[var(--text-primary)]',
   },
@@ -43,7 +43,7 @@ const PRINCIPLES: PrincipleItem[] = [
     number: '04',
     title: 'Bukan Penentu Sepihak (Non-Coercive)',
     description:
-      'Platform ini tidak memiliki wewenang memaksakan harga jual kepada pedagang pasar tradisional. HargaKu bertindak sebagai pemandu negosiasi sehat dan penyeimbang asimetri informasi antara pembeli dan penjual.',
+      'Platform ini tidak memiliki wewenang memaksakan harga jual kepada pedagang pasar tradisional. PasarKu bertindak sebagai pemandu negosiasi sehat dan penyeimbang asimetri informasi antara pembeli dan penjual.',
     icon: Scales,
     iconColor: 'text-[var(--accent-chili)]',
   },
@@ -51,7 +51,7 @@ const PRINCIPLES: PrincipleItem[] = [
     number: '05',
     title: 'Netralitas Publik Non-Komersial',
     description:
-      'HargaKu tidak menerima penempatan sponsor dari kios tertentu, tidak mempromosikan tengkulak, dan bebas dari iklan komersial berbayar yang dapat membiaskan rekomendasi harga belanja warga.',
+      'PasarKu tidak menerima penempatan sponsor dari kios tertentu, tidak mempromosikan tengkulak, dan bebas dari iklan komersial berbayar yang dapat membiaskan rekomendasi harga belanja warga.',
     icon: HandCoins,
     iconColor: 'text-[var(--text-primary)]',
   },
@@ -107,7 +107,7 @@ export function AboutEthicsPrinciples() {
 
               <div className="pt-2">
                 <span className="text-[10px] font-bold tracking-wider text-[var(--text-muted)] uppercase">
-                  Standar Etika HargaKu
+                  Standar Etika PasarKu
                 </span>
               </div>
             </div>

@@ -6,6 +6,7 @@ import { ThreeLayerPriceCards } from '@/components/commodity-detail/ThreeLayerPr
 import { PriceFluctuationChartCard } from '@/components/commodity-detail/PriceFluctuationChartCard';
 import { MarketComparisonCard } from '@/components/commodity-detail/MarketComparisonCard';
 import { RecentCitizenReportsTable } from '@/components/commodity-detail/RecentCitizenReportsTable';
+import { CommodityHitTracker } from '@/components/commodity-detail/CommodityHitTracker';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -19,12 +20,19 @@ export default async function CommodityDetailPage({ params }: Props) {
     notFound();
   }
 
+  const history = commodity.priceHistory || [];
+  const latestPrice = history.length > 0 ? history[history.length - 1].avgPrice : commodity.currentPriceStats.cityAverage;
+  const prevPrice = history.length > 1 ? history[history.length - 2].avgPrice : latestPrice;
+  const changePercentage =
+    prevPrice > 0 ? Math.round(((latestPrice - prevPrice) / prevPrice) * 1000) / 10 : 0;
+
   return (
     <div className="w-full px-4 sm:px-8 lg:px-12 py-10 sm:py-14">
       <div className="max-w-[1240px] mx-auto space-y-8">
+        <CommodityHitTracker slug={commodity.slug} />
         <CommodityBreadcrumb commodityName={commodity.name} />
 
-        <CommodityHeroHeader detail={commodity} changePercentage={2.8} />
+        <CommodityHeroHeader detail={commodity} changePercentage={changePercentage} />
 
         <ThreeLayerPriceCards detail={commodity} />
 

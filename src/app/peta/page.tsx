@@ -3,7 +3,7 @@ import { fetchCommodities } from '@/lib/api/commodities.api';
 import { PetaContainer } from '@/components/peta/PetaContainer';
 
 export const metadata: Metadata = {
-  title: 'Peta Harga Pasar Tradisional · HargaKu',
+  title: 'Peta Harga Pasar Tradisional · PasarKu',
   description:
     'Peta interaktif Mapbox sebaran harga komoditas pangan pokok di pasar-pasar tradisional Indonesia terkalibrasi daerah.',
 };

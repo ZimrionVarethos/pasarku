@@ -111,7 +111,7 @@ export const INITIAL_MARKETS: AdminMarket[] = MOCK_MARKETS.map((m) => ({
 
 function generateInitialDailyPrices(): Record<string, DailyPriceRecord> {
   const records: Record<string, DailyPriceRecord> = {};
-  const today = '2026-10-23';
+  const today = new Date().toISOString().slice(0, 10);
 
   for (const m of INITIAL_MARKETS) {
     for (const c of INITIAL_COMMODITIES) {

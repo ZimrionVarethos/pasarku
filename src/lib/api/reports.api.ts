@@ -14,8 +14,9 @@ export interface SubmitReportPayload {
   reporterRole?: ReporterRole;
   stockStatus?: StockStatus;
   purchaseDate: string;
-  photoFile?: File | null;
+  photoUrls?: string[];
   notes?: string;
+  authHeaders?: Record<string, string>;
 }
 
 export interface SubmitReportResponse {
@@ -27,6 +28,7 @@ export interface SubmitReportResponse {
   reportType?: ReportType;
   reporterRole?: ReporterRole;
   stockStatus?: StockStatus;
+  photoCount?: number;
   submittedAt: string;
   reportRecord?: AdminReport;
   message: string;
@@ -75,51 +77,33 @@ export async function submitCitizenReport(
   const reportType: ReportType = payload.reportType || 'PRICE';
   const reporterRole: ReporterRole =
     payload.reporterRole || (reportType === 'SHORTAGE' ? 'PEDAGANG' : 'WARGA');
+  const photoUrls = payload.photoUrls || [];
 
-  try {
-    const res = await fetch('/api/v1/reports', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        commodityId: payload.commodityId,
-        marketId: payload.marketId,
-        reportedPrice: payload.reportedPrice,
-        quantity: payload.quantity || 1,
-        unit: payload.unit,
-        normalizedPrice: payload.normalizedPrice ?? payload.reportedPrice,
-        reportType,
-        reporterRole,
-        stockStatus: payload.stockStatus,
-        hasPhoto: Boolean(payload.photoFile),
-        notes: payload.notes,
-      }),
-    });
-
-    const json = (await res.json()) as ApiResponse<SubmitReportResponse>;
-    if (res.ok && json.success) {
-      return json;
-    }
-  } catch {
-  }
-
-  const reportId = `REP-${Date.now().toString().slice(-6)}`;
-  return {
-    success: true,
-    message: 'Laporan berhasil disimpan (mode lokal).',
-    data: {
-      reportId,
-      status: 'PENDING',
-      commodityName: payload.commodityId,
-      marketName: payload.marketId,
-      normalizedPrice: reportType === 'SHORTAGE' ? 0 : payload.normalizedPrice ?? payload.reportedPrice,
+  const res = await fetch('/api/v1/reports', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(payload.authHeaders || {}),
+    },
+    body: JSON.stringify({
+      commodityId: payload.commodityId,
+      marketId: payload.marketId,
+      reportedPrice: payload.reportedPrice,
+      quantity: payload.quantity || 1,
+      unit: payload.unit,
+      normalizedPrice: payload.normalizedPrice ?? payload.reportedPrice,
       reportType,
       reporterRole,
       stockStatus: payload.stockStatus,
-      submittedAt: new Date().toISOString(),
-      message:
-        reportType === 'SHORTAGE'
-          ? 'Terima kasih atas info kelangkaan pasokan! Laporan masuk antrean moderasi tanpa nama toko.'
-          : 'Terima kasih atas laporanmu! Data tersimpan untuk verifikasi.',
-    },
-  };
+      hasPhoto: photoUrls.length > 0,
+      photoUrls,
+      notes: payload.notes,
+    }),
+  });
+
+  const json = (await res.json()) as ApiResponse<SubmitReportResponse>;
+  if (!res.ok || !json.success) {
+    throw new Error(json.message || 'Gagal mengirim laporan. Pastikan Anda sudah masuk akun.');
+  }
+  return json;
 }

@@ -27,7 +27,7 @@ export function PriceInsufficientDataCard({ commodityName, marketName }: Props) 
           Belum ada data pembanding resmi yang cukup untuk{' '}
           {commodityName ? <strong className="text-[var(--text-primary)]">{commodityName}</strong> : 'komoditas ini'}
           {marketName ? <> di <strong className="text-[var(--text-primary)]">{marketName}</strong></> : ''}.{' '}
-          HargaKu tidak pernah mengarang angka harga. Jadilah yang pertama melaporkan harga riil lapak untuk melengkapi data bersama warga.
+          PasarKu tidak pernah mengarang angka harga. Jadilah yang pertama melaporkan harga riil lapak untuk melengkapi data bersama warga.
         </p>
       </div>
 

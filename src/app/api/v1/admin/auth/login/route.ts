@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
     const password = (body.password || '').trim();
 
     const validEmail =
+      email === 'admin@pasarku.id' ||
       email === 'admin@hargaku.id' ||
       email === 'admin' ||
       email === DEFAULT_ADMIN_USER.email.toLowerCase();
@@ -33,6 +34,7 @@ export async function POST(req: NextRequest) {
 
     response.cookies.set(ADMIN_COOKIE_NAME, token, {
       httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
       maxAge: body.rememberMe ? 7 * 24 * 60 * 60 : 24 * 60 * 60,

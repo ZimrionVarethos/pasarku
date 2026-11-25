@@ -79,7 +79,7 @@ export function buildSourceComparisons(
     const citizenMedian =
       matchedReports.length > 0
         ? computeMedian(matchedReports.map((r) => r.normalizedPricePerKg))
-        : Math.round((localMarketPrice * 0.99) / 100) * 100;
+        : localMarketPrice;
 
     const candidates = [
       {
@@ -103,7 +103,7 @@ export function buildSourceComparisons(
         note:
           matchedReports.length > 0
             ? `Median ${matchedReports.length} laporan warga (${matchedReports[0].marketName})`
-            : 'Median laporan warga 7 hari',
+            : 'Belum ada laporan warga (mengacu survei pasar)',
       },
     ].filter((src) => {
       if (enabledSources.length === 0) return true;

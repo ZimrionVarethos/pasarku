@@ -9,7 +9,14 @@ function getFallbackCommodities(category?: CommodityCategory): CommoditySummary[
   return MOCK_COMMODITY_SUMMARIES.filter((c) => c.category === category);
 }
 
+function getRecentHistoryDates(): [string, string, string] {
+  const now = Date.now();
+  const fmt = (daysAgo: number) => new Date(now - daysAgo * 86400000).toISOString().slice(0, 10);
+  return [fmt(6), fmt(3), fmt(0)];
+}
+
 function getFallbackCommodityDetail(slug: string): CommodityDetail | null {
+  const [d6, d3, d0] = getRecentHistoryDates();
   if (MOCK_COMMODITY_DETAILS[slug]) {
     return MOCK_COMMODITY_DETAILS[slug];
   }
@@ -39,12 +46,12 @@ function getFallbackCommodityDetail(slug: string): CommodityDetail | null {
         citizenReportsCount: 3,
       },
       priceHistory: [
-        { date: '2026-10-15', avgPrice: found.previousAvgPrice },
+        { date: d6, avgPrice: found.previousAvgPrice },
         {
-          date: '2026-10-18',
+          date: d3,
           avgPrice: Math.round((found.previousAvgPrice + found.currentAvgPrice) / 2),
         },
-        { date: '2026-10-21', avgPrice: found.currentAvgPrice },
+        { date: d0, avgPrice: found.currentAvgPrice },
       ],
     };
   }
@@ -76,9 +83,9 @@ function getFallbackCommodityDetail(slug: string): CommodityDetail | null {
       citizenReportsCount: 1,
     },
     priceHistory: [
-      { date: '2026-10-15', avgPrice: Math.round(adminCom.hapHetPrice * 0.98) },
-      { date: '2026-10-18', avgPrice: Math.round(adminCom.hapHetPrice * 0.99) },
-      { date: '2026-10-21', avgPrice: adminCom.hapHetPrice },
+      { date: d6, avgPrice: Math.round(adminCom.hapHetPrice * 0.98) },
+      { date: d3, avgPrice: Math.round(adminCom.hapHetPrice * 0.99) },
+      { date: d0, avgPrice: adminCom.hapHetPrice },
     ],
   };
 }

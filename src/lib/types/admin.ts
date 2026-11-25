@@ -61,6 +61,10 @@ export interface AdminReport {
   submittedAt: string;
   hasPhoto: boolean;
   photoUrl?: string;
+  photoUrls?: string[];
+  userId?: string;
+  reporterName?: string;
+  reporterEmail?: string;
   citizenNotes?: string;
   status: 'PENDING' | 'ANOMALY' | 'APPROVED' | 'REJECTED';
   anomalyReason?: string;

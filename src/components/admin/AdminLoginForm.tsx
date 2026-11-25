@@ -131,7 +131,7 @@ export function AdminLoginForm() {
               type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@hargaku.id"
+              placeholder="admin@pasarku.id"
               className="w-full pl-10 pr-3.5 py-2.5 rounded-[10px] border-2 border-[var(--border-ink)] bg-[var(--bg-paper)] focus:bg-[var(--bg-card)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)]"
             />
           </div>

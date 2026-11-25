@@ -1,9 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchBootstrapFromDb, fetchCatalogFromDb, insertReportDb } from '@/lib/server/admin-db';
+import { getAuthorizedUserFromRequest } from '@/lib/server/user-session';
+import { findUserById } from '@/lib/server/user-db';
 import { INITIAL_ADMIN_STATE } from '@/lib/store/admin-seed';
 import { matchesCommodityRecord, matchesMarketRecord, resolveCanonicalMarket } from '@/lib/market-insights';
 import type { AdminReport } from '@/lib/types/admin';
 import type { ReportType, ReporterRole, StockStatus } from '@/types';
+
+const MAX_PHOTOS_PER_REPORT = 4;
+const MAX_SINGLE_PHOTO_LENGTH = 2_400_000;
+
+function sanitizePhotoUrls(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  const clean: string[] = [];
+  for (const item of raw) {
+    if (clean.length >= MAX_PHOTOS_PER_REPORT) break;
+    if (typeof item !== 'string') continue;
+    const trimmed = item.trim();
+    if (!trimmed || trimmed.length > MAX_SINGLE_PHOTO_LENGTH) continue;
+    const isDataImg = /^data:image\/(jpeg|jpg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(trimmed);
+    const isSafeLocal = trimmed.startsWith('/images/') && !trimmed.includes('..');
+    if (isDataImg || isSafeLocal) {
+      clean.push(trimmed);
+    }
+  }
+  return clean;
+}
+
+function stripReporterPii(report: AdminReport): AdminReport {
+  return {
+    ...report,
+    userId: undefined,
+    reporterName: undefined,
+    reporterEmail: undefined,
+  };
+}
 
 export async function GET(req: NextRequest) {
   const marketId = req.nextUrl.searchParams.get('marketId')?.trim();
@@ -32,11 +63,22 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     success: true,
     message: 'Daftar laporan terverifikasi dimuat.',
-    data: approved,
+    data: approved.map(stripReporterPii),
   });
 }
 
 export async function POST(req: NextRequest) {
+  const auth = getAuthorizedUserFromRequest(req);
+  if (!auth) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Silakan masuk ke akun PasarKu terlebih dahulu untuk mengirim laporan agar bebas fraud.',
+      },
+      { status: 401 }
+    );
+  }
+
   try {
     const body = (await req.json()) as {
       commodityId?: string;
@@ -49,6 +91,7 @@ export async function POST(req: NextRequest) {
       reporterRole?: ReporterRole;
       stockStatus?: StockStatus;
       hasPhoto?: boolean;
+      photoUrls?: string[];
       notes?: string;
     };
 
@@ -65,6 +108,9 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    const userRecord = await findUserById(auth.userId);
+    const sanitizedPhotos = sanitizePhotoUrls(body.photoUrls);
 
     const catalog = await fetchCatalogFromDb().catch(() => null);
     const commodities =
@@ -90,6 +136,14 @@ export async function POST(req: NextRequest) {
         : 0;
     const isAnomaly = reportType === 'PRICE' && Math.abs(diffPercent) > 25;
     const reportId = `REP-${Date.now().toString().slice(-6)}`;
+    const nowLabel = `${new Date().toLocaleDateString('id-ID', {
+      day: '2-digit',
+      month: 'short',
+    })}, ${new Date().toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    })} WIB`;
 
     const newReport: AdminReport = {
       id: reportId,
@@ -107,8 +161,13 @@ export async function POST(req: NextRequest) {
       cityAvgPrice: cityAvg,
       diffPercent,
       stockStatus,
-      submittedAt: 'Baru saja',
-      hasPhoto: Boolean(body.hasPhoto),
+      submittedAt: nowLabel,
+      hasPhoto: sanitizedPhotos.length > 0 || Boolean(body.hasPhoto),
+      photoUrl: sanitizedPhotos[0],
+      photoUrls: sanitizedPhotos,
+      userId: auth.userId,
+      reporterName: userRecord?.name || auth.email.split('@')[0],
+      reporterEmail: auth.email,
       citizenNotes: body.notes?.trim() || undefined,
       status: isAnomaly ? 'ANOMALY' : 'PENDING',
       anomalyReason: isAnomaly
@@ -128,7 +187,7 @@ export async function POST(req: NextRequest) {
       reportType === 'SHORTAGE'
         ? 'Terima kasih atas informasi stok! Laporan kelangkaan agregat pasar masuk antrean moderasi tanpa identitas toko.'
         : savedInDb
-        ? 'Terima kasih atas laporanmu! Data tersimpan di antrean moderasi Supabase.'
+        ? 'Terima kasih atas laporanmu! Data dan foto bukti tersimpan di antrean moderasi.'
         : 'Terima kasih atas laporanmu! Data disimpan sementara pada sesi aktif untuk moderasi.';
 
     return NextResponse.json({
@@ -145,6 +204,7 @@ export async function POST(req: NextRequest) {
         reportType,
         reporterRole,
         stockStatus,
+        photoCount: sanitizedPhotos.length,
         source: savedInDb ? 'supabase' : 'local-fallback',
         submittedAt: new Date().toISOString(),
         reportRecord: newReport,

@@ -30,11 +30,11 @@ export function AboutTeamAndTechStack() {
         <div className="market-card p-6 space-y-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[var(--accent-chili)] text-white flex items-center justify-center font-bold text-[18px]">
-              H
+              P
             </div>
             <div>
               <h3 className="text-[16px] font-bold text-[var(--text-primary)]">
-                Tim Inovasi HargaKu
+                Tim Inovasi PasarKu
               </h3>
               <p className="text-[12px] text-[var(--text-muted)]">
                 UPN Veteran Jakarta
@@ -72,7 +72,7 @@ export function AboutTeamAndTechStack() {
             </div>
 
             <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed">
-              HargaKu dibangun dengan arsitektur frontend-first yang terintegrasi secara modular dengan skema basis data relasional standar PostgreSQL &amp; Prisma ORM.
+              PasarKu dibangun dengan arsitektur web modern Next.js, Three.js WebGL &amp; Web Audio prosedural, Mapbox GL JS v3, serta Supabase PostgreSQL.
             </p>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-1">
@@ -81,20 +81,20 @@ export function AboutTeamAndTechStack() {
                 <div className="text-[13px] font-bold text-[var(--text-primary)]">Next.js 16 (App Router)</div>
               </div>
               <div className="p-3 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)]">
-                <div className="text-[11px] text-[var(--text-muted)] font-bold">Language</div>
-                <div className="text-[13px] font-bold text-[var(--text-primary)]">Strict TypeScript</div>
+                <div className="text-[11px] text-[var(--text-muted)] font-bold">3D &amp; Spasial</div>
+                <div className="text-[13px] font-bold text-[var(--text-primary)]">Three.js &amp; Mapbox v3</div>
               </div>
               <div className="p-3 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)]">
                 <div className="text-[11px] text-[var(--text-muted)] font-bold">Styling</div>
                 <div className="text-[13px] font-bold text-[var(--text-primary)]">Tailwind CSS v4</div>
               </div>
               <div className="p-3 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)]">
-                <div className="text-[11px] text-[var(--text-muted)] font-bold">Design Tokens</div>
-                <div className="text-[13px] font-bold text-[var(--text-primary)]">PasarKu Tokens</div>
+                <div className="text-[11px] text-[var(--text-muted)] font-bold">AI Assistant</div>
+                <div className="text-[13px] font-bold text-[var(--text-primary)]">Gemini + Grounded Fallback</div>
               </div>
               <div className="p-3 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)]">
                 <div className="text-[11px] text-[var(--text-muted)] font-bold">Database Layer</div>
-                <div className="text-[13px] font-bold text-[var(--text-primary)]">PostgreSQL &amp; Prisma</div>
+                <div className="text-[13px] font-bold text-[var(--text-primary)]">Supabase PostgreSQL (pg)</div>
               </div>
               <div className="p-3 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-subtle)]">
                 <div className="text-[11px] text-[var(--text-muted)] font-bold">Typography</div>
@@ -112,11 +112,11 @@ export function AboutTeamAndTechStack() {
               <ArrowRight size={15} weight="bold" />
             </Link>
             <Link
-              href="/dashboard"
+              href="/indeks-harga"
               className="market-btn-secondary w-full sm:w-auto h-11 px-5 text-[13px] font-bold flex items-center justify-center gap-2"
             >
               <ChartLineUp size={16} weight="bold" />
-              <span>Pantau Dashboard 12 Komoditas</span>
+              <span>Jelajahi Indeks 53+ Komoditas</span>
             </Link>
           </div>
         </div>

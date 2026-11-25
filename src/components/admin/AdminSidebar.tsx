@@ -193,7 +193,7 @@ export function AdminSidebar({
         onClose={() => setIsLogoutModalOpen(false)}
         onConfirm={confirmLogout}
         title="Konfirmasi Keluar"
-        description="Apakah Anda yakin ingin keluar dari Konsol Admin HargaKu? Sesi otorisasi Anda akan diakhiri."
+        description="Apakah Anda yakin ingin keluar dari Konsol Admin PasarKu? Sesi otorisasi Anda akan diakhiri."
         confirmLabel="Ya, Keluar"
         cancelLabel="Batal"
         variant="warning"

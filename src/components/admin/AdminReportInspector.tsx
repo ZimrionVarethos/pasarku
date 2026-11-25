@@ -1,23 +1,30 @@
 'use client';
 
+import { useState } from 'react';
 import {
-  ShieldCheck,
   CheckCircle,
   Prohibit,
   WarningCircle,
-  Camera,
   Question,
   Package,
+  UserCheck,
 } from '@phosphor-icons/react';
 import { AdminReport } from './admin-data';
 import { formatRupiah } from '@/lib/utils';
+import { ReportPhotoGallery } from '@/components/common/ReportPhotoGallery';
 
 interface Props {
   report: AdminReport;
   onApprove: (id: string) => void;
-  onReject: (id: string) => void;
+  onReject: (id: string, reason?: string) => void;
   onRequestMoreInfo: (id: string) => void;
 }
+
+const REJECT_PRESETS = [
+  'Foto bukti buram atau tidak sesuai komoditas.',
+  'Nominal harga terindikasi anomali / tidak wajar dibanding struk.',
+  'Laporan terdeteksi duplikat atau indikasi spam.',
+];
 
 export function AdminReportInspector({
   report,
@@ -26,6 +33,13 @@ export function AdminReportInspector({
   onRequestMoreInfo,
 }: Props) {
   const isShortage = report.reportType === 'SHORTAGE';
+  const [showRejectBox, setShowRejectBox] = useState(false);
+  const [rejectReason, setRejectReason] = useState(REJECT_PRESETS[0]);
+
+  const handleConfirmReject = () => {
+    onReject(report.id, rejectReason.trim() || REJECT_PRESETS[0]);
+    setShowRejectBox(false);
+  };
 
   return (
     <div className="market-card p-5 sm:p-7 flex flex-col gap-6">
@@ -80,11 +94,28 @@ export function AdminReportInspector({
         </div>
       </div>
 
+      {(report.reporterName || report.reporterEmail) && (
+        <div className="px-3.5 py-2.5 rounded-[12px] bg-[var(--bg-paper)] border border-[var(--border-subtle)] flex flex-wrap items-center justify-between gap-2 text-[11px]">
+          <span className="inline-flex items-center gap-1.5 font-bold text-[var(--text-primary)]">
+            <UserCheck size={15} weight="bold" className="text-[var(--forest-ink)]" />
+            <span>
+              Akun Pelapor: {report.reporterName || 'Warga'}
+              {report.reporterEmail ? ` (${report.reporterEmail})` : ''}
+            </span>
+          </span>
+          <span className="text-[10px] font-bold text-[var(--text-muted)]">
+            Audit internal · Anonim di publik
+          </span>
+        </div>
+      )}
+
       {report.anomalyReason && (
         <div className="p-4 rounded-[12px] bg-[var(--ochre-surface)] border-2 border-[var(--border-ink)] flex items-start gap-3 text-[12px]">
           <WarningCircle size={20} weight="fill" className="text-[var(--warning-ink)] shrink-0 mt-0.5" />
           <div className="flex flex-col gap-0.5">
-            <span className="font-bold text-[var(--warning-ink)]">Diagnosa Algoritma MAD:</span>
+            <span className="font-bold text-[var(--warning-ink)]">
+              {report.status === 'REJECTED' ? 'Alasan Penolakan / Diagnosa:' : 'Diagnosa Algoritma MAD:'}
+            </span>
             <p className="text-[var(--text-secondary)] leading-relaxed">{report.anomalyReason}</p>
           </div>
         </div>
@@ -106,7 +137,7 @@ export function AdminReportInspector({
               </span>
             </div>
             <div className="flex items-center justify-between pt-2 border-t border-[var(--border-subtle)] text-[12px]">
-              <span className="text-[var(--text-muted)]">Identitas Pelapor</span>
+              <span className="text-[var(--text-muted)]">Tampilan Publik</span>
               <span className="font-bold text-[var(--forest-ink)]">
                 Anonim (Hanya agregat {report.marketName})
               </span>
@@ -159,38 +190,11 @@ export function AdminReportInspector({
         </div>
       )}
 
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">
-            Bukti Foto Lapangan
-          </span>
-          <span className="text-[11px] font-bold text-[var(--forest-ink)] flex items-center gap-1">
-            <ShieldCheck size={14} weight="bold" />
-            <span>EXIF Sanitized: No GPS Metadata</span>
-          </span>
-        </div>
-
-        {report.hasPhoto ? (
-          <div className="relative rounded-[12px] bg-[var(--bg-muted)]/55 border-2 border-[var(--border-subtle)] p-6 flex flex-col items-center justify-center text-center gap-2 min-h-[140px]">
-            <Camera size={32} weight="bold" className="text-[var(--text-muted)]" />
-            <div className="flex flex-col gap-0.5">
-              <span className="text-[13px] font-bold text-[var(--text-primary)]">
-                Foto Struk / Kondisi Lapak
-              </span>
-              <span className="text-[11px] text-[var(--text-muted)]">
-                Metadata lokasi GPS telah dihapus di peramban
-              </span>
-            </div>
-            <span className="mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono-num font-bold bg-[var(--forest-surface)] text-[var(--forest-ink)] border border-[var(--forest-ink)]/35">
-              SANITY CHECK: PASSED
-            </span>
-          </div>
-        ) : (
-          <div className="p-4 rounded-[12px] bg-[var(--bg-paper)] border border-[var(--border-subtle)] text-[12px] text-[var(--text-muted)] text-center">
-            Pelapor tidak menyertakan foto.
-          </div>
-        )}
-      </div>
+      <ReportPhotoGallery
+        photoUrls={report.photoUrls}
+        fallbackPhotoUrl={report.photoUrl}
+        hasPhoto={report.hasPhoto}
+      />
 
       {report.citizenNotes && (
         <div className="p-3.5 rounded-[12px] bg-[var(--bg-paper)] border border-[var(--border-subtle)] flex flex-col gap-1 text-[12px]">
@@ -201,10 +205,59 @@ export function AdminReportInspector({
         </div>
       )}
 
+      {showRejectBox && (
+        <div className="p-4 rounded-[12px] bg-[var(--accent-chili-soft)] border-2 border-[var(--accent-chili)] space-y-3">
+          <div className="text-xs font-bold text-[var(--accent-chili)]">
+            Pilih atau Tulis Alasan Penolakan (tampil di Riwayat Pengguna):
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {REJECT_PRESETS.map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                onClick={() => setRejectReason(preset)}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border cursor-pointer ${
+                  rejectReason === preset
+                    ? 'bg-[var(--accent-chili)] text-white border-[var(--border-ink)]'
+                    : 'bg-[var(--bg-card)] text-[var(--text-primary)] border-[var(--border-subtle)]'
+                }`}
+              >
+                {preset}
+              </button>
+            ))}
+          </div>
+          <input
+            type="text"
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            className="w-full px-3 py-2 rounded-lg bg-[var(--bg-card)] border border-[var(--border-ink)] text-xs text-[var(--text-primary)]"
+          />
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleConfirmReject}
+              className="px-4 py-2 rounded-lg bg-[var(--accent-chili)] text-white text-xs font-bold border-2 border-[var(--border-ink)] cursor-pointer"
+            >
+              Konfirmasi Tolak
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowRejectBox(false)}
+              className="market-btn-secondary px-3 py-2 text-xs font-bold cursor-pointer"
+            >
+              Batal
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="pt-4 border-t-2 border-[var(--border-subtle)] flex flex-wrap items-center gap-3">
         <button
           type="button"
-          onClick={() => onApprove(report.id)}
+          onClick={() => {
+            setShowRejectBox(false);
+            onApprove(report.id);
+          }}
           className="flex-1 py-2.5 px-4 rounded-[10px] bg-[#245034] hover:bg-[#1A3B26] border-2 border-[var(--border-ink)] text-white text-[13px] font-bold flex items-center justify-center gap-1.5 shadow-[var(--shadow-hard-sm)] transition-all cursor-pointer"
         >
           <CheckCircle size={16} weight="bold" />
@@ -213,7 +266,7 @@ export function AdminReportInspector({
 
         <button
           type="button"
-          onClick={() => onReject(report.id)}
+          onClick={() => setShowRejectBox((prev) => !prev)}
           className="flex-1 py-2.5 px-4 rounded-[10px] bg-[var(--accent-chili-soft)] hover:bg-[var(--accent-chili)] hover:text-white border-2 border-[var(--border-ink)] text-[var(--accent-chili)] text-[13px] font-bold flex items-center justify-center gap-1.5 shadow-[var(--shadow-hard-sm)] transition-all cursor-pointer"
         >
           <Prohibit size={16} weight="bold" />

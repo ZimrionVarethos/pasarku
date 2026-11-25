@@ -26,8 +26,9 @@ export async function testGeminiConnection(
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey.trim() },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: 'Balas singkat maksimal 8 kata: Koneksi HargaKu Gemini aktif!' }] }],
+        contents: [{ parts: [{ text: 'Balas singkat maksimal 8 kata: Koneksi PasarKu Gemini aktif!' }] }],
       }),
+      signal: AbortSignal.timeout(8000),
     });
     const data = (await res.json()) as GeminiApiResponse;
     const latencyMs = Date.now() - start;
@@ -147,7 +148,7 @@ export async function generateMultiSourceAiReply(input: {
     .join('\n');
 
   const prompt = [
-    `PERAN: Kamu adalah PUNTEN, asisten keputusan belanja di platform PasarKu / HargaKu.`,
+    `PERAN: Kamu adalah PUNTEN, asisten keputusan belanja di platform PasarKu.`,
     `WILAYAH AKTIF: ${region.name} (${region.islandName}, ${region.zone}, Fase ${region.phase || 1} ${region.phaseLabel || 'Kota Bogor'}).`,
     `SUMBER PERBANDINGAN DATA HARGA:`,
     contextLines,
@@ -171,6 +172,7 @@ export async function generateMultiSourceAiReply(input: {
         systemInstruction: { parts: [{ text: cfg.systemInstruction }] },
         contents: [{ parts: [{ text: prompt }] }],
       }),
+      signal: AbortSignal.timeout(8000),
     });
 
     const data = (await res.json()) as GeminiApiResponse;
@@ -188,11 +190,10 @@ export async function generateMultiSourceAiReply(input: {
       referencedCommodities,
       suggestedActions,
     };
-  } catch (err) {
+  } catch {
     const fallback = await processAssistantMessage(input.message, region);
-    const errNote = err instanceof Error ? err.message : 'Gangguan koneksi AI';
     return {
-      reply: `${fallback.content}\n\n(Fallback lokal aktif sementara karena kendala Gemini API: ${errNote})`,
+      reply: `${fallback.content}\n\n> *Catatan: PUNTEN menjawab menggunakan mesin acuan lokal terverifikasi PasarKu.*`,
       intent: 'PRICE_RECOMMENDATION',
       provider: 'grounded-fallback',
       model: cfg.geminiModel,

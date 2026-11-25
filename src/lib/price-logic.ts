@@ -20,8 +20,9 @@ export function evaluatePrice(
     positioningNote?: string;
   }
 ): PriceCheckResult {
+  const safeComparison = comparisonPrice > 0 ? comparisonPrice : Math.max(offeredPrice, 1);
   const diffPercentage = Number(
-    (((offeredPrice - comparisonPrice) / comparisonPrice) * 100).toFixed(2)
+    (((offeredPrice - safeComparison) / safeComparison) * 100).toFixed(2)
   );
 
   let status: PriceCheckStatus;

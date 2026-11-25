@@ -20,13 +20,13 @@ export function AboutHeroHeader() {
         </div>
 
         <h1 className="text-[34px] sm:text-[44px] lg:text-[48px] font-bold text-[var(--text-primary)] leading-[1.12] tracking-tight">
-          Tentang HargaKu &amp; Integritas Data
+          Tentang PasarKu &amp; Integritas Data
         </h1>
 
         <p className="text-[15px] sm:text-[16px] text-[var(--text-secondary)] max-w-[760px] leading-[1.6]">
-          HargaKu adalah instrumen transparansi harga komoditas pangan independen untuk inisiatif{' '}
+          PasarKu adalah instrumen transparansi harga komoditas pangan independen untuk inisiatif{' '}
           <strong className="text-[var(--text-primary)] font-bold">Web In Action (WIA 2026, UPN Veteran Jakarta)</strong>. 
-          Dirancang untuk membantu warga belanja cerdas tanpa kecemasan, melindungi privasi pedagang tradisional, dan menyajikan data berbasis metodologi statistik yang akuntabel.
+          Dirancang untuk membantu warga belanja cerdas tanpa kecemasan, melindungi privasi pedagang tradisional, dan menyajikan data berbasis metodologi 3 lapis yang akuntabel.
         </p>
       </div>
 

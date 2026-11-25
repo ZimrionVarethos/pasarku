@@ -8,6 +8,7 @@ import { resolveCanonicalMarket } from '@/lib/market-insights';
 import { useRegion } from '@/lib/store/region-store';
 import { useLiveCatalog } from '@/lib/store/use-live-catalog';
 import { useAssistant } from '@/lib/store/assistant-store';
+import { useUserAuth } from '@/lib/store/user-auth-store';
 import { PriceCheckForm } from './PriceCheckForm';
 import { TAKARAN_UNITS, type PriceQuickPreset } from './price-check-presets';
 import { PriceEvaluationResultCard } from './PriceEvaluationResultCard';
@@ -31,6 +32,7 @@ export function PriceCheckerContainer({
   const { selectedRegion, regionMarkets } = useRegion();
   const { commodities: liveCommodities, markets: liveMarkets } = useLiveCatalog();
   const { sendMessage } = useAssistant();
+  const { trackCommodityQuery } = useUserAuth();
 
   const currentCommodities =
     liveCommodities.length > 0 ? liveCommodities : initialCommodities;
@@ -163,7 +165,10 @@ export function PriceCheckerContainer({
   };
 
   const executeEvaluation = useCallback(async () => {
-    if (!effectiveCommodityId || normalizedPricePerKg <= 0) return;
+    if (!effectiveCommodityId || normalizedPricePerKg <= 0) {
+      setResult(null);
+      return;
+    }
     setLoading(true);
     try {
       const res = await submitPriceCheck({
@@ -199,11 +204,15 @@ export function PriceCheckerContainer({
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+    if (selectedCommodity?.slug) {
+      trackCommodityQuery(selectedCommodity.slug);
+    }
     void executeEvaluation();
   };
 
   const handleAskPuntenForOffer = () => {
     if (!selectedCommodity || !result) return;
+    trackCommodityQuery(selectedCommodity.slug);
     const location = selectedMarket?.name || result.regionName || 'pasar rakyat';
     const unit = TAKARAN_UNITS.find((u) => u.id === selectedUnitId);
     const portionDesc = `${takaranAmount} ${unit?.shortLabel || 'kg'}`;

@@ -4,7 +4,7 @@ import { useState, useId, useEffect } from 'react';
 import { CaretDown, Check, Package, Tag } from '@phosphor-icons/react';
 import { CommoditySummary, Market, ReportType, ReporterRole, StockStatus } from '@/types';
 import { resolveCanonicalMarket } from '@/lib/market-insights';
-import { LaporPhotoUpload } from './LaporPhotoUpload';
+import { LaporPhotoUpload, type UploadedPhotoItem } from './LaporPhotoUpload';
 import {
   LaporPriceInputGroup,
   LaporShortageSelector,
@@ -16,6 +16,7 @@ interface Props {
   commodities: CommoditySummary[];
   markets: Market[];
   isSubmitting: boolean;
+  reporterLabel?: string;
   initialCommoditySlug?: string;
   initialMarketId?: string;
   initialPrice?: string;
@@ -31,7 +32,7 @@ interface Props {
     reporterRole: ReporterRole;
     stockStatus?: StockStatus;
     purchaseDate: string;
-    photoFile: File | null;
+    photoUrls: string[];
     notes: string;
   }) => void;
 }
@@ -40,6 +41,7 @@ export function LaporFormCard({
   commodities,
   markets,
   isSubmitting,
+  reporterLabel,
   initialCommoditySlug,
   initialMarketId,
   initialPrice,
@@ -67,7 +69,7 @@ export function LaporFormCard({
   );
   const [stockStatus, setStockStatus] = useState<StockStatus>('TERBATAS');
   const [notes, setNotes] = useState<string>('');
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photos, setPhotos] = useState<UploadedPhotoItem[]>([]);
 
   useEffect(() => {
     if (markets.length > 0 && !markets.some((m) => m.id === selectedMarketId)) {
@@ -99,13 +101,23 @@ export function LaporFormCard({
       reporterRole: isShortage ? 'PEDAGANG' : 'WARGA',
       stockStatus: isShortage ? stockStatus : undefined,
       purchaseDate: new Date().toISOString(),
-      photoFile,
+      photoUrls: photos.map((p) => p.dataUrl),
       notes,
     });
   };
 
   return (
     <form onSubmit={handleSubmit} className="market-card p-6 sm:p-8 flex flex-col gap-5">
+      {reporterLabel && (
+        <div className="px-3.5 py-2.5 rounded-xl bg-[var(--forest-surface)] border border-[var(--forest-ink)]/35 flex items-center justify-between gap-2 text-[11px]">
+          <span className="font-bold text-[var(--forest-ink)] truncate">
+            Pelapor Terverifikasi: {reporterLabel}
+          </span>
+          <span className="text-[10px] font-bold text-[var(--text-secondary)] shrink-0">
+            Anonim di Publik
+          </span>
+        </div>
+      )}
       <div className="flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-2 p-1 rounded-xl bg-[var(--bg-muted)] border border-[var(--border-ink)]">
           <button
@@ -199,7 +211,7 @@ export function LaporFormCard({
         />
       )}
 
-      <LaporPhotoUpload photoFile={photoFile} setPhotoFile={setPhotoFile} fileInputId={fileInputId} />
+      <LaporPhotoUpload photos={photos} onChangePhotos={setPhotos} fileInputId={fileInputId} />
 
       <div className="flex flex-col gap-1.5">
         <label className="text-[12px] font-bold text-[var(--text-primary)]">

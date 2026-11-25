@@ -59,7 +59,7 @@ export function AdminReportsView() {
             <AdminReportInspector
               report={selectedReport}
               onApprove={approveReport}
-              onReject={(id) => rejectReport(id)}
+              onReject={(id, reason) => rejectReport(id, reason)}
               onRequestMoreInfo={(id) =>
                 requestReportInfo(id, 'Butuh verifikasi fisik timbangan')
               }

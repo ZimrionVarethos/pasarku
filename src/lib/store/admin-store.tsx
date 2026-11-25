@@ -48,6 +48,7 @@ interface AdminStoreContextType {
   rejectReport: (id: string, reason?: string) => void;
   requestReportInfo: (id: string, note: string) => void;
   resetToDefaultData: () => void;
+  refreshBootstrap: () => Promise<void>;
 }
 
 const STORAGE_KEY = 'hargaku_admin_store_v4';
@@ -79,6 +80,35 @@ export function AdminStoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     stateRef.current = state;
   }, [state]);
+
+  const refreshBootstrap = useCallback(async () => {
+    try {
+      const res = await fetch('/api/v1/admin/bootstrap', {
+        cache: 'no-store',
+        headers: getAdminAuthHeaders(),
+      });
+      const json = (await res.json()) as {
+        success?: boolean;
+        data?: Partial<AdminState> & { source?: 'supabase' | 'fallback' };
+      };
+      if (!json?.success || !json.data) return;
+      const serverData = json.data;
+      if (serverData.source === 'supabase') setDataSource('supabase');
+      if (Array.isArray(serverData.commodities) && Array.isArray(serverData.markets)) {
+        dispatch({
+          type: 'SET_STATE',
+          payload: {
+            ...stateRef.current,
+            commodities: serverData.commodities,
+            markets: serverData.markets,
+            dailyPrices: serverData.dailyPrices || stateRef.current.dailyPrices,
+            reports: Array.isArray(serverData.reports) ? serverData.reports : stateRef.current.reports,
+          },
+        });
+      }
+    } catch {
+    }
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -115,35 +145,14 @@ export function AdminStoreProvider({ children }: { children: ReactNode }) {
     } catch {
     }
 
-    fetch('/api/v1/admin/bootstrap', { cache: 'no-store' })
-      .then((res) => res.json())
-      .then((json: { success?: boolean; data?: Partial<AdminState> & { source?: 'supabase' | 'fallback' } }) => {
-        if (!active || !json?.success || !json.data) return;
-        const serverData = json.data;
-        if (serverData.source === 'supabase') setDataSource('supabase');
-        if (Array.isArray(serverData.commodities) && Array.isArray(serverData.markets)) {
-          dispatch({
-            type: 'SET_STATE',
-            payload: {
-              ...stateRef.current,
-              commodities: serverData.commodities,
-              markets: serverData.markets,
-              dailyPrices: serverData.dailyPrices || stateRef.current.dailyPrices,
-              reports: Array.isArray(serverData.reports) ? serverData.reports : stateRef.current.reports,
-            },
-          });
-        }
-      })
-      .catch(() => {
-      })
-      .finally(() => {
-        if (active) setIsLoaded(true);
-      });
+    void refreshBootstrap().finally(() => {
+      if (active) setIsLoaded(true);
+    });
 
     return () => {
       active = false;
     };
-  }, []);
+  }, [refreshBootstrap]);
 
   useEffect(() => {
     if (isLoaded) {
@@ -255,12 +264,12 @@ export function AdminStoreProvider({ children }: { children: ReactNode }) {
       reports: state.reports,
       updateProfile, addCommodity, updateCommodity, deleteCommodity,
       addMarket, updateMarket, deleteMarket, updateDailyPrices,
-      addReport, approveReport, rejectReport, requestReportInfo, resetToDefaultData,
+      addReport, approveReport, rejectReport, requestReportInfo, resetToDefaultData, refreshBootstrap,
     }),
     [
       isLoaded, dataSource, state, updateProfile, addCommodity, updateCommodity,
       deleteCommodity, addMarket, updateMarket, deleteMarket, updateDailyPrices,
-      addReport, approveReport, rejectReport, requestReportInfo, resetToDefaultData,
+      addReport, approveReport, rejectReport, requestReportInfo, resetToDefaultData, refreshBootstrap,
     ]
   );
 

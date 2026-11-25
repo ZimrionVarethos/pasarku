@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AdminTopbar } from './AdminTopbar';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminOverviewView } from './AdminOverviewView';
@@ -9,11 +9,17 @@ import { AdminCommoditiesView } from './AdminCommoditiesView';
 import { AdminMarketsView } from './AdminMarketsView';
 import { AdminDailyPricesView } from './AdminDailyPricesView';
 import { AdminSettingsView } from './AdminSettingsView';
+import { useAdminStore } from '@/lib/store/admin-store';
 import type { AdminModule } from '@/lib/types/admin';
 
 function AdminWorkspace() {
+  const { refreshBootstrap } = useAdminStore();
   const [activeModule, setActiveModule] = useState<AdminModule>('overview');
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+
+  useEffect(() => {
+    void refreshBootstrap();
+  }, [refreshBootstrap]);
 
   return (
     <div className="flex-1 flex flex-col justify-between gap-6">

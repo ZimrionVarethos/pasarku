@@ -4,9 +4,9 @@ import { ubuntu } from '@/app/fonts';
 import { PublicLayoutWrapper } from '@/components/layout/PublicLayoutWrapper';
 
 export const metadata: Metadata = {
-  title: 'PasarKu Bogor: Harga Pasar, Lebih Dekat',
+  title: 'PasarKu: Tawar Pintar, Belanja Wajar',
   description:
-    'Platform digital untuk menjelajahi, membandingkan, dan memantau harga komoditas pasar secara real-time berdasarkan publikasi resmi Perumda Pasar Pakuan Jaya Kota Bogor.',
+    'Platform independen alat bantu keputusan harga pangan pasar rakyat lintas wilayah Indonesia, membandingkan tawaran eceran lapak terhadap acuan Bapanas, PIHPS BI, dan laporan warga.',
   icons: {
     icon: '/images/pasarku/logo-nav.webp',
   },

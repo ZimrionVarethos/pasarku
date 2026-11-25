@@ -3,7 +3,7 @@ import { AdminLoginForm } from '@/components/admin/AdminLoginForm';
 import { AdminLoginShowcase } from '@/components/admin/AdminLoginShowcase';
 
 export const metadata: Metadata = {
-  title: 'Masuk Konsol Admin · HargaKu',
+  title: 'Masuk Konsol Admin · PasarKu',
   description:
     'Portal autentikasi petugas pemantau pasar untuk pengelolaan data komoditas dan moderasi.',
 };

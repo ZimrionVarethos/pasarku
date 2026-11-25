@@ -189,10 +189,14 @@ export function AdminReportQueue({
                 )}
 
                 <div className="flex items-center gap-2 text-[var(--text-muted)]">
-                  {r.hasPhoto && (
+                  {(r.hasPhoto || (r.photoUrls && r.photoUrls.length > 0)) && (
                     <span className="flex items-center gap-0.5 text-[var(--forest-ink)] font-bold">
                       <Camera size={12} weight="bold" />
-                      <span>Foto</span>
+                      <span>
+                        {r.photoUrls && r.photoUrls.length > 1
+                          ? `${r.photoUrls.length} Foto`
+                          : 'Foto'}
+                      </span>
                     </span>
                   )}
                   <span>{r.submittedAt}</span>

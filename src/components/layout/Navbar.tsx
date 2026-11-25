@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { MagnifyingGlass, Moon, Sun } from '@phosphor-icons/react';
+import { MagnifyingGlass, Moon, Sun, UserCircle, SignIn } from '@phosphor-icons/react';
 import { useTheme } from '@/lib/store/theme-store';
+import { useUserAuth } from '@/lib/store/user-auth-store';
 import { RegionPhaseSwitcher } from './RegionPhaseSwitcher';
 import { GlobalSearchModal } from './GlobalSearchModal';
 
@@ -19,6 +20,7 @@ const NAV_LINKS = [
 
 export function Navbar() {
   const { theme, toggleTheme } = useTheme();
+  const { user } = useUserAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const pathname = usePathname();
@@ -105,6 +107,24 @@ export function Navbar() {
             )}
           </button>
 
+          {user ? (
+            <Link
+              href="/akun"
+              className="market-btn-primary px-2.5 sm:px-3.5 py-1.5 text-xs min-h-[38px] sm:min-h-[40px] inline-flex items-center gap-1.5 no-underline shrink-0"
+            >
+              <UserCircle size={16} weight="bold" aria-hidden="true" />
+              <span className="hidden sm:inline max-w-[96px] truncate">{user.name.split(' ')[0]}</span>
+            </Link>
+          ) : (
+            <Link
+              href="/masuk"
+              className="market-btn-primary px-2.5 sm:px-3.5 py-1.5 text-xs min-h-[38px] sm:min-h-[40px] inline-flex items-center gap-1.5 no-underline shrink-0"
+            >
+              <SignIn size={15} weight="bold" aria-hidden="true" />
+              <span className="hidden sm:inline">Masuk</span>
+            </Link>
+          )}
+
           <button
             type="button"
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -143,6 +163,35 @@ export function Navbar() {
                 </Link>
               );
             })}
+            <div className="pt-2 border-t border-[var(--border-subtle)] flex items-center gap-2">
+              {user ? (
+                <Link
+                  href="/akun"
+                  onClick={() => setMobileOpen(false)}
+                  className="market-btn-primary w-full py-2.5 text-xs font-bold inline-flex items-center justify-center gap-1.5 no-underline"
+                >
+                  <UserCircle size={16} weight="bold" />
+                  <span>Dashboard {user.name.split(' ')[0]}</span>
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/masuk"
+                    onClick={() => setMobileOpen(false)}
+                    className="market-btn-primary flex-1 py-2 text-xs font-bold text-center no-underline"
+                  >
+                    Masuk
+                  </Link>
+                  <Link
+                    href="/daftar"
+                    onClick={() => setMobileOpen(false)}
+                    className="market-btn-secondary flex-1 py-2 text-xs font-bold text-center no-underline"
+                  >
+                    Daftar
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}

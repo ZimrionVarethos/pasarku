@@ -67,6 +67,7 @@ export function LorongThreeMarketAlley({
   const [actionBanner, setActionBanner] = useState<BannerPrompt | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isTurnedAway, setIsTurnedAway] = useState(false);
+  const [webglFailed, setWebglFailed] = useState(false);
   const lastRaycastRef = useRef<number>(0);
   const prevWalkProgressRef = useRef<number>(walkProgress);
   const stepAccRef = useRef<number>(0);
@@ -122,10 +123,15 @@ export function LorongThreeMarketAlley({
     const mountEl = canvasMountRef.current;
     const mgr = new ThreeMarketCorridorManager();
     lastTaggedRef.current = compartmentsRef.current;
-    mgr.init(mountEl, isDarkRef.current, compartmentsRef.current);
-    mgr.setActive(isActiveRef.current);
-    mgr.setLookStateListener((turned) => setIsTurnedAway(turned));
-    managerRef.current = mgr;
+    try {
+      mgr.init(mountEl, isDarkRef.current, compartmentsRef.current);
+      mgr.setActive(isActiveRef.current);
+      mgr.setLookStateListener((turned) => setIsTurnedAway(turned));
+      managerRef.current = mgr;
+    } catch {
+      setWebglFailed(true);
+      return;
+    }
 
     const handleResize = () => {
       if (!canvasMountRef.current || !managerRef.current) return;
@@ -402,6 +408,22 @@ export function LorongThreeMarketAlley({
         ref={canvasMountRef}
         className="absolute inset-0 w-full h-full z-0 pointer-events-none"
       />
+
+      {webglFailed && (
+        <div
+          className="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 text-center bg-cover bg-center"
+          style={{ backgroundImage: "url('/images/pasarku/market-alley-real.jpg')" }}
+        >
+          <div className="market-card bg-[var(--bg-card)]/95 p-5 max-w-md space-y-2">
+            <p className="text-sm font-bold text-[var(--text-primary)]">
+              Mode Ringan Lorong Pasar Aktif
+            </p>
+            <p className="text-xs text-[var(--text-secondary)]">
+              Perangkat ini menonaktifkan akselerasi WebGL 3D. Gunakan bilah zona di bawah atau tombol Semua 53 Komoditas untuk memilih bahan pangan.
+            </p>
+          </div>
+        </div>
+      )}
 
       {activeBanner && (
         <div className="absolute top-[108px] sm:top-[64px] left-3 sm:left-1/2 sm:-translate-x-1/2 z-30 pointer-events-none transition-opacity duration-150 max-w-[calc(100vw-155px)] sm:max-w-[52vw]">

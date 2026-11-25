@@ -78,10 +78,38 @@ CREATE TABLE IF NOT EXISTS citizen_reports (
   submitted_at TEXT NOT NULL,
   has_photo BOOLEAN NOT NULL DEFAULT false,
   photo_url TEXT,
+  photo_urls JSONB NOT NULL DEFAULT '[]'::jsonb,
+  user_id TEXT,
+  reporter_name TEXT,
+  reporter_email TEXT,
   citizen_notes TEXT,
   status TEXT NOT NULL DEFAULT 'PENDING',
   anomaly_reason TEXT,
   exif_sanitized BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL UNIQUE,
+  password_hash TEXT,
+  auth_provider TEXT NOT NULL DEFAULT 'EMAIL',
+  email_verified BOOLEAN NOT NULL DEFAULT false,
+  preferred_region_id TEXT NOT NULL DEFAULT 'reg_bogor',
+  avatar_url TEXT,
+  frequent_commodities JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS email_otps (
+  id TEXT PRIMARY KEY,
+  email TEXT NOT NULL,
+  code_hash TEXT NOT NULL,
+  purpose TEXT NOT NULL DEFAULT 'REGISTER',
+  expires_at TIMESTAMPTZ NOT NULL,
+  consumed BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -102,12 +130,18 @@ ALTER TABLE citizen_reports ADD COLUMN IF NOT EXISTS report_type TEXT NOT NULL D
 ALTER TABLE citizen_reports ADD COLUMN IF NOT EXISTS reporter_role TEXT NOT NULL DEFAULT 'WARGA';
 ALTER TABLE citizen_reports ADD COLUMN IF NOT EXISTS quantity DOUBLE PRECISION NOT NULL DEFAULT 1;
 ALTER TABLE citizen_reports ADD COLUMN IF NOT EXISTS stock_status TEXT;
+ALTER TABLE citizen_reports ADD COLUMN IF NOT EXISTS photo_urls JSONB NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE citizen_reports ADD COLUMN IF NOT EXISTS user_id TEXT;
+ALTER TABLE citizen_reports ADD COLUMN IF NOT EXISTS reporter_name TEXT;
+ALTER TABLE citizen_reports ADD COLUMN IF NOT EXISTS reporter_email TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_daily_prices_commodity ON daily_prices(commodity_id);
 CREATE INDEX IF NOT EXISTS idx_daily_prices_market ON daily_prices(market_id);
 CREATE INDEX IF NOT EXISTS idx_markets_region ON markets(region_id);
 CREATE INDEX IF NOT EXISTS idx_citizen_reports_status ON citizen_reports(status);
 CREATE INDEX IF NOT EXISTS idx_citizen_reports_market_status ON citizen_reports(market_id, status, report_type);
+CREATE INDEX IF NOT EXISTS idx_citizen_reports_user ON citizen_reports(user_id);
+CREATE INDEX IF NOT EXISTS idx_email_otps_email ON email_otps(email, created_at DESC);
 
 ALTER TABLE regions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE commodities ENABLE ROW LEVEL SECURITY;
@@ -115,6 +149,8 @@ ALTER TABLE markets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE daily_prices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE citizen_reports ENABLE ROW LEVEL SECURITY;
 ALTER TABLE system_settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE email_otps ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "public_read_regions" ON regions;
 CREATE POLICY "public_read_regions" ON regions FOR SELECT USING (true);

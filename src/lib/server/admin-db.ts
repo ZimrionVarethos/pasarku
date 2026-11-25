@@ -1,4 +1,5 @@
 import { dbQuery } from './db';
+import { ensureUserSchemaReady } from './user-db';
 import type { AdminCommodity, AdminMarket, DailyPriceRecord, AdminReport, CommodityCategory } from '@/lib/types/admin';
 
 interface CommodityRow {
@@ -57,6 +58,10 @@ interface ReportRow {
   submitted_at: string;
   has_photo: boolean;
   photo_url: string | null;
+  photo_urls?: string[] | string | null;
+  user_id?: string | null;
+  reporter_name?: string | null;
+  reporter_email?: string | null;
   citizen_notes: string | null;
   status: string;
   anomaly_reason: string | null;
@@ -110,7 +115,27 @@ function mapDailyPriceRows(rows: DailyPriceRow[]): Record<string, DailyPriceReco
   return dailyPrices;
 }
 
+function parsePhotoUrls(raw: string[] | string | null | undefined, fallbackUrl: string | null): string[] {
+  let parsed: string[] = [];
+  if (Array.isArray(raw)) {
+    parsed = raw.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
+  } else if (typeof raw === 'string' && raw.trim()) {
+    try {
+      const json = JSON.parse(raw) as unknown;
+      if (Array.isArray(json)) {
+        parsed = json.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
+      }
+    } catch {
+    }
+  }
+  if (parsed.length === 0 && fallbackUrl && fallbackUrl.trim()) {
+    parsed = [fallbackUrl.trim()];
+  }
+  return parsed;
+}
+
 function mapReportRow(r: ReportRow): AdminReport {
+  const photos = parsePhotoUrls(r.photo_urls, r.photo_url);
   return {
     id: r.id,
     commodityId: r.commodity_id || undefined,
@@ -128,8 +153,12 @@ function mapReportRow(r: ReportRow): AdminReport {
     diffPercent: Number(r.diff_percent),
     stockStatus: (r.stock_status as AdminReport['stockStatus']) || undefined,
     submittedAt: r.submitted_at,
-    hasPhoto: r.has_photo,
-    photoUrl: r.photo_url || undefined,
+    hasPhoto: r.has_photo || photos.length > 0,
+    photoUrl: photos[0] || r.photo_url || undefined,
+    photoUrls: photos,
+    userId: r.user_id || undefined,
+    reporterName: r.reporter_name || undefined,
+    reporterEmail: r.reporter_email || undefined,
     citizenNotes: r.citizen_notes || undefined,
     status: r.status as AdminReport['status'],
     anomalyReason: r.anomaly_reason || undefined,
@@ -156,6 +185,7 @@ export async function fetchCatalogFromDb() {
 }
 
 export async function fetchBootstrapFromDb() {
+  await ensureUserSchemaReady();
   const [catalog, repRes] = await Promise.all([
     fetchCatalogFromDb(),
     dbQuery<ReportRow>('SELECT * FROM citizen_reports ORDER BY created_at DESC LIMIT 120'),
@@ -164,6 +194,15 @@ export async function fetchBootstrapFromDb() {
     ...catalog,
     reports: repRes.rows.map(mapReportRow),
   };
+}
+
+export async function fetchUserReportsFromDb(userId: string, email: string): Promise<AdminReport[]> {
+  await ensureUserSchemaReady();
+  const res = await dbQuery<ReportRow>(
+    'SELECT * FROM citizen_reports WHERE user_id = $1 OR LOWER(reporter_email) = $2 ORDER BY created_at DESC LIMIT 60',
+    [userId, email.trim().toLowerCase()]
+  );
+  return res.rows.map(mapReportRow);
 }
 
 export async function upsertCommodityDb(c: AdminCommodity) {
@@ -216,16 +255,19 @@ export async function upsertDailyPricesDb(
 }
 
 export async function insertReportDb(r: AdminReport) {
+  await ensureUserSchemaReady();
+  const photos = r.photoUrls && r.photoUrls.length > 0 ? r.photoUrls : r.photoUrl ? [r.photoUrl] : [];
   await dbQuery(
-    `INSERT INTO citizen_reports (id, commodity_id, commodity_name, market_id, market_name, report_type, reporter_role, quantity, reported_price, unit, normalized_price_per_kg, official_hap_price, city_avg_price, diff_percent, stock_status, submitted_at, has_photo, photo_url, citizen_notes, status, anomaly_reason, exif_sanitized)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
+    `INSERT INTO citizen_reports (id, commodity_id, commodity_name, market_id, market_name, report_type, reporter_role, quantity, reported_price, unit, normalized_price_per_kg, official_hap_price, city_avg_price, diff_percent, stock_status, submitted_at, has_photo, photo_url, photo_urls, user_id, reporter_name, reporter_email, citizen_notes, status, anomaly_reason, exif_sanitized)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19::jsonb, $20, $21, $22, $23, $24, $25, $26)
      ON CONFLICT (id) DO NOTHING`,
     [
       r.id, r.commodityId || null, r.commodityName, r.marketId || null, r.marketName,
       r.reportType || 'PRICE', r.reporterRole || 'WARGA', r.quantity || 1,
       r.reportedPrice, r.unit, r.normalizedPricePerKg, r.officialHapPrice, r.cityAvgPrice, r.diffPercent,
-      r.stockStatus || null, r.submittedAt, r.hasPhoto, r.photoUrl || null, r.citizenNotes || null,
-      r.status, r.anomalyReason || null, r.exifSanitized,
+      r.stockStatus || null, r.submittedAt, r.hasPhoto || photos.length > 0, photos[0] || null, JSON.stringify(photos),
+      r.userId || null, r.reporterName || null, r.reporterEmail || null,
+      r.citizenNotes || null, r.status, r.anomalyReason || null, r.exifSanitized,
     ]
   );
 }

@@ -82,15 +82,21 @@ export function Bogor3DMapCanvas({
     if (!configLoaded || !mapboxToken || !containerRef.current || mapRef.current) return;
 
     mapboxgl.accessToken = mapboxToken;
-    const map = new mapboxgl.Map({
-      container: containerRef.current,
-      style: 'mapbox://styles/mapbox/standard',
-      center: BOGOR_MAP_CENTER,
-      zoom: 12.75,
-      pitch: 56,
-      bearing: -20,
-      antialias: true,
-    });
+    let map: mapboxgl.Map;
+    try {
+      map = new mapboxgl.Map({
+        container: containerRef.current,
+        style: 'mapbox://styles/mapbox/standard',
+        center: BOGOR_MAP_CENTER,
+        zoom: 12.75,
+        pitch: 56,
+        bearing: -20,
+        antialias: true,
+      });
+    } catch {
+      setMapError('WebGL Mapbox tidak tersedia di perangkat ini. Gunakan daftar 13 unit pasar di bawah.');
+      return;
+    }
 
     map.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), 'bottom-right');
     mapRef.current = map;

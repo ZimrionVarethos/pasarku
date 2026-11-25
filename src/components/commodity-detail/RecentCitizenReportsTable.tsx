@@ -11,7 +11,9 @@ export function RecentCitizenReportsTable({ detail }: { detail: CommodityDetail 
   const { reports } = useLiveCatalog();
 
   const matchingReports = useMemo(() => {
-    return reports.filter((r) => matchesCommodityRecord(r, detail)).slice(0, 8);
+    return reports
+      .filter((r) => r.status === 'APPROVED' && matchesCommodityRecord(r, detail))
+      .slice(0, 8);
   }, [reports, detail]);
 
   return (
@@ -28,7 +30,7 @@ export function RecentCitizenReportsTable({ detail }: { detail: CommodityDetail 
 
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--bg-muted)] border border-[var(--border-subtle)] text-[11px] font-bold text-[var(--text-primary)] w-fit">
           <ShieldCheck size={14} weight="bold" className="text-[var(--accent-chili)]" />
-          <span>Moderator HargaKu &amp; Pemantau Pasar</span>
+          <span>Moderator PasarKu &amp; Pemantau Pasar</span>
         </div>
       </div>
 
@@ -102,7 +104,7 @@ export function RecentCitizenReportsTable({ detail }: { detail: CommodityDetail 
       </div>
 
       <div className="pt-2 border-t border-[var(--border-subtle)] text-[12px] text-[var(--text-secondary)] leading-[18px]">
-        <strong className="text-[var(--text-primary)] font-bold">Kode etik perlindungan pedagang:</strong> Nama toko dan identitas perseorangan tidak pernah ditampilkan di platform publik. Seluruh data diverifikasi agregat per pasar oleh Moderator HargaKu.
+        <strong className="text-[var(--text-primary)] font-bold">Kode etik perlindungan pedagang:</strong> Nama toko dan identitas perseorangan tidak pernah ditampilkan di platform publik. Seluruh data diverifikasi agregat per pasar oleh Moderator PasarKu.
       </div>
     </div>
   );

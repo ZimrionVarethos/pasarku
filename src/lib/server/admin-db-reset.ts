@@ -99,8 +99,8 @@ export async function resetDefaultDataDb() {
 
     if (INITIAL_ADMIN_REPORTS.length > 0) {
       await client.query(
-        `INSERT INTO citizen_reports (id, commodity_id, commodity_name, market_id, market_name, report_type, reporter_role, quantity, reported_price, unit, normalized_price_per_kg, official_hap_price, city_avg_price, diff_percent, stock_status, submitted_at, has_photo, photo_url, citizen_notes, status, anomaly_reason, exif_sanitized)
-         SELECT * FROM UNNEST($1::text[], $2::text[], $3::text[], $4::text[], $5::text[], $6::text[], $7::text[], $8::double precision[], $9::int[], $10::text[], $11::int[], $12::int[], $13::int[], $14::double precision[], $15::text[], $16::text[], $17::boolean[], $18::text[], $19::text[], $20::text[], $21::text[], $22::boolean[])`,
+        `INSERT INTO citizen_reports (id, commodity_id, commodity_name, market_id, market_name, report_type, reporter_role, quantity, reported_price, unit, normalized_price_per_kg, official_hap_price, city_avg_price, diff_percent, stock_status, submitted_at, has_photo, photo_url, photo_urls, user_id, reporter_name, reporter_email, citizen_notes, status, anomaly_reason, exif_sanitized)
+         SELECT * FROM UNNEST($1::text[], $2::text[], $3::text[], $4::text[], $5::text[], $6::text[], $7::text[], $8::double precision[], $9::int[], $10::text[], $11::int[], $12::int[], $13::int[], $14::double precision[], $15::text[], $16::text[], $17::boolean[], $18::text[], $19::jsonb[], $20::text[], $21::text[], $22::text[], $23::text[], $24::text[], $25::text[], $26::boolean[])`,
         [
           INITIAL_ADMIN_REPORTS.map((r) => r.id),
           INITIAL_ADMIN_REPORTS.map((r) => r.commodityId || null),
@@ -120,6 +120,10 @@ export async function resetDefaultDataDb() {
           INITIAL_ADMIN_REPORTS.map((r) => r.submittedAt),
           INITIAL_ADMIN_REPORTS.map((r) => r.hasPhoto),
           INITIAL_ADMIN_REPORTS.map((r) => r.photoUrl || null),
+          INITIAL_ADMIN_REPORTS.map((r) => JSON.stringify(r.photoUrls || (r.photoUrl ? [r.photoUrl] : []))),
+          INITIAL_ADMIN_REPORTS.map((r) => r.userId || null),
+          INITIAL_ADMIN_REPORTS.map((r) => r.reporterName || null),
+          INITIAL_ADMIN_REPORTS.map((r) => r.reporterEmail || null),
           INITIAL_ADMIN_REPORTS.map((r) => r.citizenNotes || null),
           INITIAL_ADMIN_REPORTS.map((r) => r.status),
           INITIAL_ADMIN_REPORTS.map((r) => r.anomalyReason || null),
